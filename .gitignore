@@ -1,1 +1,4 @@
 test/
+
+# ignore all subfolder node_modules/
+**/node_modules/

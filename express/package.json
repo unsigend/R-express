@@ -1,0 +1,24 @@
+{
+    "name": "simplified-express",
+    "version": "1.0.0",
+    "description": "Simplified express library",
+    "main": "index.js",
+    "directories": {
+        "lib": "lib"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "express",
+        "simplified",
+        "web",
+        "framework"
+    ],
+    "author": "Qiu Yixiang",
+    "license": "BSD-2-Clause",
+    "type": "module",
+    "dependencies": {
+        "path-to-regex": "^1.3.8"
+    }
+}

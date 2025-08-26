@@ -25,10 +25,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// simplified express main entry
+/**
+ * @typedef {import("./application.js").default} Application
+ */
 
-export default function createApplication() {
-    const app = function (req, res, next) {};
+/**
+ * Main entry point for the express library
+ * Simply returns a new instance of the Application class
+ * To make sure the consistency of the API
+ */
 
-    return app;
-}
+import _Application from "./application.js";
+
+const express = () => {
+    return new _Application();
+};
+
+export default express;

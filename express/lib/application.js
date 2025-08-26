@@ -25,13 +25,82 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class Application {
+import { createServer } from "http";
+
+// used for route matching in hash
+const METHODS = {
+    GET: "GET",
+    POST: "POST",
+    PATCH: "PATCH",
+    PUT: "PUT",
+    DELETE: "DELETE",
+};
+
+/**
+ * @typedef {Object} Application
+ * @property {Map<string, Array<Function>>} __routes
+ * @property {Object} __cache
+ * @property {Object} __engines
+ * @property {Object} __settings
+ * @property {Server} __server
+ */
+
+class _Application {
     constructor() {
         this.__cache = {};
         this.__engines = {};
         this.__settings = {};
-        this.__router = {};
+
+        this.__server = createServer(this.serverHandler);
+        this.__routes = new Map();
     }
+
+    serverHandler = (req, res) => {};
+
+    get = (path, ...handlers) => {
+        const currentHandlers =
+            this.__routes.get(`${path}/${METHODS.GET}`) || [];
+        this.__routes.set(`${path}/${METHODS.GET}`, [
+            ...currentHandlers,
+            ...handlers,
+        ]);
+    };
+
+    post = (path, ...handlers) => {
+        const currentHandlers =
+            this.__routes.get(`${path}/${METHODS.POST}`) || [];
+        this.__routes.set(`${path}/${METHODS.POST}`, [
+            ...currentHandlers,
+            ...handlers,
+        ]);
+    };
+
+    patch = (path, ...handlers) => {
+        const currentHandlers =
+            this.__routes.get(`${path}/${METHODS.PATCH}`) || [];
+        this.__routes.set(`${path}/${METHODS.PATCH}`, [
+            ...currentHandlers,
+            ...handlers,
+        ]);
+    };
+
+    put = (path, ...handlers) => {
+        const currentHandlers =
+            this.__routes.get(`${path}/${METHODS.PUT}`) || [];
+        this.__routes.set(`${path}/${METHODS.PUT}`, [
+            ...currentHandlers,
+            ...handlers,
+        ]);
+    };
+
+    delete = (path, ...handlers) => {
+        const currentHandlers =
+            this.__routes.get(`${path}/${METHODS.DELETE}`) || [];
+        this.__routes.set(`${path}/${METHODS.DELETE}`, [
+            ...currentHandlers,
+            ...handlers,
+        ]);
+    };
 }
 
-export default Application;
+export default _Application;

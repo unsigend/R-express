@@ -24,3 +24,17 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+const Response = {
+    send: (response, data) => {
+        response.setHeader("Content-Type", "text/plain");
+        response.end(data);
+    },
+};
+
+const responseDefaultMiddleware = (request, response, next) => {
+    response.send = (data) => Response.send(response, data);
+    next();
+};
+
+export default responseDefaultMiddleware;

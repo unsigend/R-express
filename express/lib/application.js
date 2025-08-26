@@ -29,6 +29,10 @@
 import http from "http";
 import { match } from "path-to-regexp";
 
+// built-in middlewares
+import requestDefaultMiddleware from "./request.js";
+import responseDefaultMiddleware from "./response.js";
+
 // used for route matching in hash
 const METHODS = {
     GET: "GET",
@@ -41,18 +45,11 @@ const METHODS = {
 /**
  * @typedef {Object} Application
  * @property {Map<string, Array<Function>>} __routes
- * @property {Object} __cache
- * @property {Object} __engines
- * @property {Object} __settings
  * @property {Server} __server
  */
 
 class _Application {
     constructor() {
-        this.__cache = {};
-        this.__engines = {};
-        this.__settings = {};
-
         this.__server = http.createServer(this.#_serverHandler);
         this.__routes = new Map();
     }
@@ -91,11 +88,22 @@ class _Application {
             const matchResult = routeRegex(sanitizedUrl);
 
             if (matchResult) {
-                return { path, params: matchResult.params };
+                return path;
             }
         }
 
         return null;
+    };
+
+    #_invokeMiddlewares = async (request, response, middlewares) => {
+        if (middlewares.length === 0) {
+            return;
+        }
+        const [currentMiddleware, ...restMiddlewares] = middlewares;
+        const next = async () => {
+            await this.#_invokeMiddlewares(request, response, restMiddlewares);
+        };
+        return currentMiddleware(request, response, next);
     };
 
     #_serverHandler = async (request, response) => {
@@ -103,14 +111,15 @@ class _Application {
         const matchedRoute = this.#_matchUrl(sanitizedUrl);
 
         if (matchedRoute) {
-            const { path, params } = matchedRoute;
-            const handlers = this.__routes.get(path);
+            const path = matchedRoute;
+            const userMiddlewares = this.__routes.get(path) || [];
+            const middlewares = [
+                requestDefaultMiddleware(this.__routes),
+                responseDefaultMiddleware,
+                ...userMiddlewares,
+            ];
 
-            request.params = params;
-
-            for (const handler of handlers) {
-                await handler(request, response);
-            }
+            await this.#_invokeMiddlewares(request, response, middlewares);
         } else {
             response.statusCode = 404;
             response.end("Not Found");

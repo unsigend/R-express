@@ -25,7 +25,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { createServer } from "http";
+// dependencies
+import http from "http";
+import { match } from "path-to-regexp";
 
 // used for route matching in hash
 const METHODS = {
@@ -51,11 +53,69 @@ class _Application {
         this.__engines = {};
         this.__settings = {};
 
-        this.__server = createServer(this.serverHandler);
+        this.__server = http.createServer(this.#_serverHandler);
         this.__routes = new Map();
     }
 
-    serverHandler = (req, res) => {};
+    /**
+     * @param {string} url the url to be sanitized
+     * @param {string} method one of the methods in METHODS
+     * @returns {string} a sanitized url
+     *
+     * @usage: / -> //GET
+     *         /api/v1 -> /api/v1/GET
+     *         /api/v1/users?id=1 -> /api/v1/users/GET
+     */
+    #_sanitizeUrl = (url, method) => {
+        const removedLeadingSlash = url.split("/").slice(1);
+
+        const lastParam = removedLeadingSlash[removedLeadingSlash.length - 1];
+        if (lastParam.includes("?")) {
+            removedLeadingSlash.pop();
+            removedLeadingSlash.push(lastParam.split("?")[0]);
+        }
+
+        const fullUrl = removedLeadingSlash.join("/");
+        return `/${fullUrl}/${method.toUpperCase()}`;
+    };
+
+    /**
+     * @param {string} sanitizedUrl the sanitized url to be matched
+     * @returns {Object|null} the matched route and its params, or null if no match is found
+     */
+    #_matchUrl = (sanitizedUrl) => {
+        for (const path of this.__routes.keys()) {
+            const routeRegex = match(path, {
+                decode: decodeURIComponent,
+            });
+            const matchResult = routeRegex(sanitizedUrl);
+
+            if (matchResult) {
+                return { path, params: matchResult.params };
+            }
+        }
+
+        return null;
+    };
+
+    #_serverHandler = async (request, response) => {
+        const sanitizedUrl = this.#_sanitizeUrl(request.url, request.method);
+        const matchedRoute = this.#_matchUrl(sanitizedUrl);
+
+        if (matchedRoute) {
+            const { path, params } = matchedRoute;
+            const handlers = this.__routes.get(path);
+
+            request.params = params;
+
+            for (const handler of handlers) {
+                await handler(request, response);
+            }
+        } else {
+            response.statusCode = 404;
+            response.end("Not Found");
+        }
+    };
 
     get = (path, ...handlers) => {
         const currentHandlers =
@@ -100,6 +160,10 @@ class _Application {
             ...currentHandlers,
             ...handlers,
         ]);
+    };
+
+    listen = (port, callback) => {
+        this.__server.listen(port, callback);
     };
 }
 

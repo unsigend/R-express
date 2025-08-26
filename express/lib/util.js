@@ -24,20 +24,3 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-/**
- * @typedef {import("./application.js").default} Application
- */
-
-/**
- * Main entry point for the express library
- * Simply returns a new instance of the Application class
- * To make sure the consistency of the API
- */
-import _Application from "./application.js";
-
-const express = () => {
-    return new _Application();
-};
-
-export default express;

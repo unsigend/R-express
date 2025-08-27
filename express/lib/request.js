@@ -69,6 +69,12 @@ const Request = {
     },
 };
 
+/**
+ * @param {Map<string, Array<Function>>} routes
+ * @returns {Function}
+ *
+ * A built-in middleware to process the request
+ */
 const requestDefaultMiddleware = (routes) => {
     const middleware = (request, response, next) => {
         request.query = Request.getQuery(request);

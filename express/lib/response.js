@@ -26,12 +26,16 @@
  */
 
 const Response = {
-    send: (response, data) => {
-        response.setHeader("Content-Type", "text/plain");
-        response.end(data);
-    },
+    send: (response, data) => {},
 };
 
+/**
+ * @param {http.IncomingMessage} request
+ * @param {http.ServerResponse} response
+ * @param {Function} next
+ *
+ * A built-in middleware to process the response
+ */
 const responseDefaultMiddleware = (request, response, next) => {
     response.send = (data) => Response.send(response, data);
     next();

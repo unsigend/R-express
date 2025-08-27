@@ -95,6 +95,15 @@ class _Application {
         return null;
     };
 
+    /**
+     * @param {http.IncomingMessage} request
+     * @param {http.ServerResponse} response
+     * @param {Array<Function>} middlewares
+     * @returns {Promise<void>}
+     *
+     * call the middlewares in sequence,
+     * and pass the next function to the next middleware
+     */
     #_invokeMiddlewares = async (request, response, middlewares) => {
         if (middlewares.length === 0) {
             return;
@@ -106,6 +115,13 @@ class _Application {
         return currentMiddleware(request, response, next);
     };
 
+    /**
+     * @param {http.IncomingMessage} request
+     * @param {http.ServerResponse} response
+     * @returns {Promise<void>}
+     *
+     * handle the request and response, just a wrapper of Node.js http server
+     */
     #_serverHandler = async (request, response) => {
         const sanitizedUrl = this.#_sanitizeUrl(request.url, request.method);
         const matchedRoute = this.#_matchUrl(sanitizedUrl);
@@ -126,6 +142,12 @@ class _Application {
         }
     };
 
+    /**
+     * @param {string} path
+     * @param {Array<Function>} handlers
+     *
+     * add a GET route
+     */
     get = (path, ...handlers) => {
         const currentHandlers =
             this.__routes.get(`${path}/${METHODS.GET}`) || [];
@@ -135,6 +157,12 @@ class _Application {
         ]);
     };
 
+    /**
+     * @param {string} path
+     * @param {Array<Function>} handlers
+     *
+     * add a POST route
+     */
     post = (path, ...handlers) => {
         const currentHandlers =
             this.__routes.get(`${path}/${METHODS.POST}`) || [];
@@ -144,6 +172,12 @@ class _Application {
         ]);
     };
 
+    /**
+     * @param {string} path
+     * @param {Array<Function>} handlers
+     *
+     * add a PATCH route
+     */
     patch = (path, ...handlers) => {
         const currentHandlers =
             this.__routes.get(`${path}/${METHODS.PATCH}`) || [];
@@ -153,6 +187,12 @@ class _Application {
         ]);
     };
 
+    /**
+     * @param {string} path
+     * @param {Array<Function>} handlers
+     *
+     * add a PUT route
+     */
     put = (path, ...handlers) => {
         const currentHandlers =
             this.__routes.get(`${path}/${METHODS.PUT}`) || [];
@@ -162,6 +202,12 @@ class _Application {
         ]);
     };
 
+    /**
+     * @param {string} path
+     * @param {Array<Function>} handlers
+     *
+     * add a DELETE route
+     */
     delete = (path, ...handlers) => {
         const currentHandlers =
             this.__routes.get(`${path}/${METHODS.DELETE}`) || [];
@@ -171,6 +217,12 @@ class _Application {
         ]);
     };
 
+    /**
+     * @param {number} port
+     * @param {Function} callback
+     *
+     * listen to the port
+     */
     listen = (port, callback) => {
         this.__server.listen(port, callback);
     };
